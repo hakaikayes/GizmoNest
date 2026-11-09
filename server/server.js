@@ -239,13 +239,6 @@ app.patch('/api/admin/products/:id/stock', requireAuth, requireAdmin, (req, res)
   if (!result.changes) return res.status(404).json({ error: 'Product not found.' })
   res.json({ ok: true })
 })
-app.post('/api/admin/products/enable-ordering', requireAuth, requireAdmin, (req,res)=>{
-  const parsed=z.object({stock:z.number().int().min(1).max(100000)}).safeParse(req.body)
-  if(!parsed.success)return res.status(400).json({error:'Choose a starting stock quantity from 1 to 100,000.'})
-  const result=db.prepare("UPDATE products SET stock=?,is_demo=0 WHERE is_demo=1 AND category<>'Archived'").run(parsed.data.stock)
-  logAdmin(req,'products.demo-ordering-enabled',`enabled ${result.changes} listings with stock ${parsed.data.stock}`)
-  res.json({ok:true,updated:result.changes,stock:parsed.data.stock})
-})
 app.patch('/api/admin/orders/:code', requireAuth, requireAdmin, (req, res) => {
   const status = z.enum(['Pending','Confirmed','Processing','Shipped','Delivered','Cancelled','Out for Delivery']).safeParse(req.body.status)
   if (!status.success) return res.status(400).json({ error: 'Choose a valid order status.' })
